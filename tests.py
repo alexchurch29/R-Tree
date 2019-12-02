@@ -1,0 +1,42 @@
+from RTree import RTree
+from Obj import Obj
+from MBR import MBR
+from Coordinate import Coordinate
+
+r_tree = RTree(4, 2)
+root = Obj("R", MBR(Coordinate(20, 45), Coordinate(30, 20)))
+Obj_a = Obj('A', MBR(Coordinate(22, 40), Coordinate(30, 30)))
+Obj_b = Obj('B', MBR(Coordinate(25, 35), Coordinate(40, 25)))
+Obj_c = Obj('C', MBR(Coordinate(44, 40), Coordinate(47, 25)))
+Obj_d = Obj('D', MBR(Coordinate(52, 43), Coordinate(68, 22)))
+Obj_e = Obj('E', MBR(Coordinate(13, 45), Coordinate(20, 25)))
+Obj_f = Obj('F', MBR(Coordinate(34, 44), Coordinate(42, 37)))
+Obj_g = Obj('G', MBR(Coordinate(7, 24), Coordinate(13, 12)))
+Obj_h = Obj('H', MBR(Coordinate(22, 45), Coordinate(24, 27)))
+Obj_i = Obj('I', MBR(Coordinate(44, 41), Coordinate(47, 35)))
+Obj_j = Obj('J', MBR(Coordinate(2, 27), Coordinate(11, 17)))
+Obj_k = Obj('K', MBR(Coordinate(72, 27), Coordinate(81, 17)))
+Obj_l = Obj('L', MBR(Coordinate(66, 47), Coordinate(71, 37)))
+Obj_m = Obj('M', MBR(Coordinate(56, 53), Coordinate(76, 46)))
+Obj_n = Obj('N', MBR(Coordinate(77, 22), Coordinate(88, 15)))
+Obj_o = Obj('O', MBR(Coordinate(67, 47), Coordinate(78, 37)))
+
+r_tree.insert(root)
+r_tree.insert(Obj_a)
+r_tree.insert(Obj_b)
+r_tree.insert(Obj_c)
+r_tree.insert(Obj_d)
+r_tree.insert(Obj_e)
+r_tree.insert(Obj_f)
+r_tree.insert(Obj_g)
+r_tree.insert(Obj_h)
+r_tree.insert(Obj_i)
+r_tree.insert(Obj_j)
+r_tree.insert(Obj_k)
+r_tree.insert(Obj_l)
+r_tree.insert(Obj_m)
+r_tree.insert(Obj_n)
+r_tree.insert(Obj_o)
+
+r_tree.draw()
+print(r_tree)
