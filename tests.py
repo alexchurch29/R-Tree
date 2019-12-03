@@ -11,7 +11,7 @@ from statistics import mean
 def main():
     # basic_demo()
     # insertion_demo(1000, 64, 32)
-    wasted_space_demo(1000, 4, 2)
+    wasted_space_demo(1000, 64, 32)
     return
 
 
@@ -101,28 +101,66 @@ def wasted_space_demo(n, max, min):
             coords.add(rect)
         return
 
+    def sweep(node):
+        area = 0
+        rectangles = [i.mbr for i in node.children]
+        x_vals, y_vals = [], []
+
+        for rectangle in rectangles:
+            x_vals.extend([rectangle.lower_left.x, rectangle.lower_right.x])
+            y_vals.extend([rectangle.lower_left.y, rectangle.upper_left.y])
+
+        x_vals, y_vals = list(sorted(x_vals)), list(sorted(y_vals))
+
+        for i in range(1, len(x_vals)):
+            for j in range(1, len(y_vals)):
+                cell = MBR(Coordinate(x_vals[i - 1], y_vals[j - 1]), Coordinate(x_vals[i], y_vals[j]))
+                # print 'Checking cell', cell
+                for rectangle in rectangles:
+                    center = Coordinate((cell.lower_right.x + cell.upper_left.x)/2, (cell.lower_right.y + cell.upper_left.y)/2)
+                    contains = rectangle.upper_left.y > center.y and rectangle.upper_left.x < center.x \
+                        and rectangle.lower_right.y < center.y and rectangle.lower_right.x > center.x
+                    if contains:
+                        # print '\tAdding area', cell.area
+                        area = area - cell.area
+                        break
+
+        return area
+
+    generate_coords(n)
+    r_tree = RTree(max, min)
+    g_tree = GreeneTree(max, min)
+    for i in coords:
+        r_tree.insert(i)
+        g_tree.insert(i)
+
     r_wasted = list()
+
+    def wasted_space(node):
+        while node.depth != 1:
+            waste = node.mbr.area - sweep(node)
+            r_wasted.append(waste / node.mbr.area)
+            for j in node.children:
+                node = j
+                wasted_space(node)
+        return
+
+    wasted_space(r_tree.root)
+    print("average wasted space r_tree: {}".format(1-mean(r_wasted)))
+
     g_wasted = list()
 
-    for t in range(10):
-        generate_coords(n)
-        r_tree = RTree(max, min)
-        g_tree = GreeneTree(max, min)
+    def wasted_space(node):
+        while isinstance(node, GreeneTree.Node):
+            waste = node.mbr.area - sweep(node)
+            g_wasted.append(waste / node.mbr.area)
+            for j in node.children:
+                node = j
+                wasted_space(node)
+        return
 
-        for i in coords:
-            r_tree.insert(i)
-        wasted_space = r_tree.root.mbr.area - (r_tree.root.children[0].mbr.area + r_tree.root.children[1].mbr.area -
-                                           r_tree.root.children[0].mbr.overlap(r_tree.root.children[1].mbr))
-        r_wasted.append(wasted_space)
-
-        for i in coords:
-            g_tree.insert(i)
-        wasted_space = g_tree.root.mbr.area - (g_tree.root.children[0].mbr.area + g_tree.root.children[1].mbr.area -
-                                           g_tree.root.children[0].mbr.overlap(g_tree.root.children[1].mbr))
-        g_wasted.append(wasted_space)
-
-    print("average wasted space r_tree: {}".format(mean(r_wasted)))
-    print("average wasted space g_tree: {}".format(mean(g_wasted)))
+    wasted_space(g_tree.root)
+    print("average wasted space r_tree: {}".format(1-mean(g_wasted)))
 
     return
 
