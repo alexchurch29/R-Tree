@@ -1,9 +1,9 @@
 from MBR import MBR
 from Drawer import Drawer
 import queue
+import math
 
-
-class RTree:
+class GreeneTree:
     def __init__(self, maxN, minN):
         self.root = None
         self.maxN = maxN
@@ -163,23 +163,43 @@ class RTree:
                             x = self.children[i]
                             y = self.children[j]
 
-            r = self.__class__(MBR.generate(x.mbr), self.maxN, self.minN, self.depth)
-            r.children.append(x)
-            s = self.__class__(MBR.generate(y.mbr), self.maxN, self.minN, self.depth)
-            s.children.append(y)
+            left = x.mbr.lower_right.x < y.mbr.upper_left.x
+            right = x.mbr.upper_left.x < y.mbr.lower_right.x
+            bottom = x.mbr.upper_left.y < y.mbr.lower_right.y
+            top = x.mbr.lower_right.y < y.mbr.upper_left.y
 
-            m = [i for i in self.children if i != x and i != y]
-            for i in range(len(m)):
-                count = len(m) - i
-                rthresh = r.minN - len(r.children)
-                sthresh = s.minN - len(s.children)
-                if count == rthresh:
-                    r.children.append(m[i])
-                elif count == sthresh:
-                    s.children.append(m[i])
-                else:
-                    n = self.find_min([r, s], m[i])
-                    n.children.append(m[i])
+            if left and bottom:
+                dist_x = y.mbr.lower_left.x - x.mbr.upper_right.x
+                dist_y = y.mbr.lower_left.y - x.mbr.upper_right.y
+            elif right and bottom:
+                dist_x = x.mbr.lower_left.x - y.mbr.upper_right.x
+                dist_y = y.mbr.lower_right.y - x.mbr.upper_left.y
+            elif left and top:
+                dist_x = y.mbr.lower_left.x - x.mbr.upper_right.x
+                dist_y = x.mbr.lower_left.y - y.mbr.upper_right.y
+            else:
+                dist_x = x.mbr.lower_left.x - y.mbr.upper_right.x
+                dist_y = x.mbr.lower_left.y - y.mbr.upper_right.y
+
+            normalized_x = dist_x / (self.mbr.upper_right.x - self.mbr.upper_left.x)
+            normalized_y = dist_y / (self.mbr.upper_right.y - self.mbr.lower_left.y)
+
+            if normalized_x > normalized_y:
+                sorted_children = sorted(self.children, key=lambda i: (i.mbr.lower_left.x + i.mbr.lower_right.x)/2)
+            else:
+                sorted_children = sorted(self.children, key=lambda i: (i.mbr.upper_left.y + i.mbr.lower_right.y) / 2)
+
+            r = self.__class__(MBR.generate(x.mbr), self.maxN, self.minN, self.depth)
+            s = self.__class__(MBR.generate(y.mbr), self.maxN, self.minN, self.depth)
+
+            m = math.floor((self.maxN+1)/2)
+            for i in sorted_children[:m]:
+                r.children.append(i)
+            for i in sorted_children[-m:]:
+                s.children.append(i)
+            if (self.maxN + 1) % 2 != 0:
+                n = self.find_min([r, s], sorted_children[m])
+                n.children.append(sorted_children[m])
 
             for i in [r, s]:
                 for j in range(len(i.children)):
@@ -207,23 +227,43 @@ class RTree:
                             x = self.children[i]
                             y = self.children[j]
 
-            r = self.__class__(MBR.generate(x.mbr), self.maxN, self.minN, self.depth)
-            r.children.append(x)
-            s = self.__class__(MBR.generate(y.mbr), self.maxN, self.minN, self.depth)
-            s.children.append(y)
+            left = x.mbr.lower_right.x < y.mbr.upper_left.x
+            right = x.mbr.upper_left.x < y.mbr.lower_right.x
+            bottom = x.mbr.upper_left.y < y.mbr.lower_right.y
+            top = x.mbr.lower_right.y < y.mbr.upper_left.y
 
-            m = [i for i in self.children if i != x and i != y]
-            for i in range(len(m)):
-                count = len(m) - i
-                rthresh = r.minN - len(r.children)
-                sthresh = s.minN - len(s.children)
-                if count == rthresh:
-                    r.children.append(m[i])
-                elif count == sthresh:
-                    s.children.append(m[i])
-                else:
-                    n = self.find_min([r, s], m[i])
-                    n.children.append(m[i])
+            if left and bottom:
+                dist_x = y.mbr.lower_left.x - x.mbr.upper_right.x
+                dist_y = y.mbr.lower_left.y - x.mbr.upper_right.y
+            elif right and bottom:
+                dist_x = x.mbr.lower_left.x - y.mbr.upper_right.x
+                dist_y = y.mbr.lower_right.y - x.mbr.upper_left.y
+            elif left and top:
+                dist_x = y.mbr.lower_left.x - x.mbr.upper_right.x
+                dist_y = x.mbr.lower_left.y - y.mbr.upper_right.y
+            else:
+                dist_x = x.mbr.lower_left.x - y.mbr.upper_right.x
+                dist_y = x.mbr.lower_left.y - y.mbr.upper_right.y
+
+            normalized_x = dist_x / (self.mbr.upper_right.x - self.mbr.upper_left.x)
+            normalized_y = dist_y / (self.mbr.upper_right.y - self.mbr.lower_left.y)
+
+            if normalized_x > normalized_y:
+                sorted_children = sorted(self.children, key=lambda i: (i.mbr.lower_left.x + i.mbr.lower_right.x) / 2)
+            else:
+                sorted_children = sorted(self.children, key=lambda i: (i.mbr.upper_left.y + i.mbr.lower_right.y) / 2)
+
+            r = self.__class__(MBR.generate(x.mbr), self.maxN, self.minN, self.depth)
+            s = self.__class__(MBR.generate(y.mbr), self.maxN, self.minN, self.depth)
+
+            m = math.floor((self.maxN + 1) / 2)
+            for i in sorted_children[:m]:
+                r.children.append(i)
+            for i in sorted_children[-m:]:
+                s.children.append(i)
+            if (self.maxN + 1) % 2 != 0:
+                n = self.find_min([r, s], sorted_children[m])
+                n.children.append(sorted_children[m])
 
             for i in [r, s]:
                 for j in range(len(i.children)):

@@ -19,6 +19,13 @@ class MBR:
     def __hash__(self):
         return hash(f'{hash(self.lower_right)}{hash(self.upper_left)}')
 
+    def overlap(self, other):
+        dx = min(self.lower_right.x, other.lower_right.x) - max(self.lower_left.x, other.lower_left.x)
+        dy = min(self.upper_left.y, other.upper_left.y) - max(self.lower_left.y, other.lower_left.y)
+        if (dx >= 0) and (dy >= 0):
+            return dx * dy
+        return 0
+
     def contains(self, other):
         '''
         checks if one rectangle contains the other
